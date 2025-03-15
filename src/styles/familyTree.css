@@ -43,3 +43,14 @@
   opacity: 0.5;
   font-size: 10px;
 }
+
+/* Add custom styles for sidebar */
+.group-data-[collapsible=icon] .SidebarGroupLabel {
+  visibility: hidden;
+}
+
+/* Ensure proper spacing in sidebar */
+.sidebar-group {
+  margin-bottom: 1rem;
+}
+
