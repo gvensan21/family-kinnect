@@ -3,7 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import FamilyTree from "@/components/FamilyTree";
+import FamilyTreeFlow from "@/components/FamilyTreeFlow";
 
 const Dashboard = () => {
   return (
@@ -106,11 +106,11 @@ const Dashboard = () => {
               <CardHeader>
                 <CardTitle>Family Tree Visualization</CardTitle>
                 <CardDescription>
-                  Click on a member to see details or edit
+                  Drag to reposition the tree, zoom with mouse wheel, and click on members to see details
                 </CardDescription>
               </CardHeader>
               <CardContent className="h-[calc(100%-5rem)] p-0">
-                <FamilyTree />
+                <FamilyTreeFlow />
               </CardContent>
             </Card>
           </div>
