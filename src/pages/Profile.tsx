@@ -35,6 +35,9 @@ const formSchema = z.object({
   birthCity: z.string().optional(),
   birthState: z.string().optional(),
   birthCountry: z.string().optional(),
+  currentCity: z.string().optional(),
+  currentState: z.string().optional(),
+  currentCountry: z.string().optional(),
   gotra: z.string().optional(),
   pravara: z.string().optional(),
   occupation: z.string().optional(),
@@ -63,6 +66,9 @@ const Profile = () => {
       birthCity: "",
       birthState: "",
       birthCountry: "",
+      currentCity: "",
+      currentState: "",
+      currentCountry: "",
       gotra: "",
       pravara: "",
       occupation: "",
@@ -273,6 +279,51 @@ const Profile = () => {
                           <FormLabel>Country</FormLabel>
                           <FormControl>
                             <Input placeholder="Birth country" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-medium">Current Location</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+                    <FormField
+                      control={form.control}
+                      name="currentCity"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>City</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Current city" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="currentState"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>State</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Current state" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="currentCountry"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Country</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Current country" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
