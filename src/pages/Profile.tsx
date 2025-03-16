@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth, useUser } from "@clerk/clerk-react";
+import { useFamilyTree } from "@/services/api";
 import {
   Form,
   FormControl,
@@ -19,6 +21,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -53,12 +56,17 @@ const formSchema = z.object({
 
 const Profile = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { userId } = useAuth();
+  const { user } = useUser();
+  const { saveProfileAndCreateNode, getUserProfile } = useFamilyTree();
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
+      name: user?.fullName || "",
       nickname: "",
-      email: "",
+      email: user?.primaryEmailAddress?.emailAddress || "",
       phone: "",
       gender: "male",
       dateOfBirth: "",
@@ -83,12 +91,40 @@ const Profile = () => {
     },
   });
 
+  // Query to fetch existing profile data
+  const { data: profileData, isLoading } = useQuery({
+    queryKey: ['profile', userId],
+    queryFn: getUserProfile,
+    enabled: !!userId,
+    onSuccess: (data) => {
+      if (data) {
+        // Reset form with existing data
+        form.reset(data);
+      }
+    }
+  });
+
+  // Mutation to save profile data
+  const saveProfileMutation = useMutation({
+    mutationFn: saveProfileAndCreateNode,
+    onSuccess: () => {
+      toast({
+        title: "Profile Updated",
+        description: "Your profile has been successfully updated and added to your family tree.",
+      });
+      navigate("/dashboard");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update profile",
+        variant: "destructive",
+      });
+    }
+  });
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    toast({
-      title: "Profile Updated",
-      description: "Your profile has been successfully updated.",
-    });
+    saveProfileMutation.mutate(values);
   }
 
   return (
@@ -108,9 +144,12 @@ const Profile = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {isLoading ? (
+            <div className="flex justify-center my-8">Loading your profile...</div>
+          ) : (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
                     control={form.control}
                     name="name"
@@ -496,9 +535,15 @@ const Profile = () => {
                   </div>
                 </div>
                 
-                <Button type="submit">Save Profile</Button>
-            </form>
-          </Form>
+                <Button 
+                  type="submit" 
+                  disabled={saveProfileMutation.isPending}
+                >
+                  {saveProfileMutation.isPending ? "Saving..." : "Save Profile"}
+                </Button>
+              </form>
+            </Form>
+          )}
         </CardContent>
       </Card>
     </div>

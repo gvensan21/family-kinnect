@@ -1,10 +1,11 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
+import { useSignIn } from "@clerk/clerk-react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -29,6 +30,10 @@ const formSchema = z.object({
 
 const Login = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { isLoaded, signIn, setActive } = useSignIn();
+  const [isLoading, setIsLoading] = React.useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -37,15 +42,43 @@ const Login = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // In Phase 1, we're just showing a toast notification
-    toast({
-      title: "Login Successful",
-      description: `Welcome back!`,
-    });
-    
-    // In the next phase, we'll implement proper authentication
-    console.log("Login values:", values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!isLoaded) {
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      
+      const result = await signIn.create({
+        identifier: values.email,
+        password: values.password,
+      });
+
+      if (result.status === "complete") {
+        await setActive({ session: result.createdSessionId });
+        toast({
+          title: "Login Successful",
+          description: "Welcome back!",
+        });
+        navigate("/profile");
+      } else {
+        toast({
+          title: "Login Failed",
+          description: "Please check your credentials and try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      console.error("Error during login:", error);
+      toast({
+        title: "Login Error",
+        description: error.message || "An error occurred during login.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -86,8 +119,8 @@ const Login = () => {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
-                Sign in
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Signing in..." : "Sign in"}
               </Button>
             </form>
           </Form>

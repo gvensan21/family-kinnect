@@ -10,6 +10,7 @@ import {
   Globe,
   LogOut
 } from "lucide-react";
+import { useClerk } from "@clerk/clerk-react";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -24,11 +25,31 @@ import {
   SidebarMenuItem,
   useSidebar
 } from "@/components/ui/sidebar";
+import { useToast } from "@/hooks/use-toast";
 
 export const AppSidebarContent = () => {
   const location = useLocation();
   const { state } = useSidebar();
+  const { signOut } = useClerk();
+  const { toast } = useToast();
   const isCollapsed = state === "collapsed";
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Signed out",
+        description: "You have been signed out successfully.",
+      });
+    } catch (error) {
+      console.error("Error signing out:", error);
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <Sidebar collapsible="icon">
@@ -104,11 +125,13 @@ export const AppSidebarContent = () => {
       </SidebarContent>
       <SidebarFooter>
         <div className={`px-2 py-2 ${isCollapsed ? "flex justify-center" : ""}`}>
-          <Button variant="outline" className={`${isCollapsed ? "p-2 h-9 w-9" : "w-full justify-start"}`} asChild>
-            <Link to="/">
-              <LogOut className="h-4 w-4" />
-              {!isCollapsed && <span className="ml-2">Sign Out</span>}
-            </Link>
+          <Button 
+            variant="outline" 
+            className={`${isCollapsed ? "p-2 h-9 w-9" : "w-full justify-start"}`}
+            onClick={handleSignOut}
+          >
+            <LogOut className="h-4 w-4" />
+            {!isCollapsed && <span className="ml-2">Sign Out</span>}
           </Button>
         </div>
       </SidebarFooter>

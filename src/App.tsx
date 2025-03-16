@@ -3,7 +3,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { SignedIn, SignedOut, useAuth } from "@clerk/clerk-react";
 import { AppSidebar } from "./components/AppSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import Index from "./pages/Index";
@@ -15,6 +16,21 @@ import NotFound from "./pages/NotFound";
 import "./styles/familyTree.css";
 
 const queryClient = new QueryClient();
+
+// Protected route component
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isSignedIn, isLoaded } = useAuth();
+  
+  if (!isLoaded) {
+    return <div className="flex h-screen items-center justify-center">Loading...</div>;
+  }
+
+  if (!isSignedIn) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
+};
 
 // Wrapper component to conditionally add sidebar and sidebar trigger
 const PageWrapper = ({ children }: { children: React.ReactNode }) => {
@@ -55,7 +71,9 @@ const App = () => (
             path="/dashboard"
             element={
               <PageWrapper>
-                <Dashboard />
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
               </PageWrapper>
             }
           />
@@ -63,7 +81,9 @@ const App = () => (
             path="/profile"
             element={
               <PageWrapper>
-                <Profile />
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
               </PageWrapper>
             }
           />

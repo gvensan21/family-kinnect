@@ -1,10 +1,11 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
+import { useSignUp } from "@clerk/clerk-react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -38,6 +39,10 @@ const formSchema = z.object({
 
 const Register = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { isLoaded, signUp, setActive } = useSignUp();
+  const [isLoading, setIsLoading] = React.useState(false);
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -48,15 +53,62 @@ const Register = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // In Phase 1, we're just showing a toast notification
-    toast({
-      title: "Registration Successful",
-      description: `Welcome, ${values.name}!`,
-    });
-    
-    // In the next phase, we'll implement proper authentication
-    console.log("Registration values:", values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!isLoaded) {
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      
+      // Start the sign up process
+      await signUp.create({
+        firstName: values.name.split(' ')[0],
+        lastName: values.name.split(' ').slice(1).join(' ') || '',
+        emailAddress: values.email,
+        password: values.password,
+      });
+
+      // Send email verification code
+      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      
+      toast({
+        title: "Verification Email Sent",
+        description: "Please check your email for a verification code.",
+      });
+      
+      // Continue with verification
+      const code = prompt("Please enter the verification code sent to your email:");
+      
+      if (!code) {
+        throw new Error("Verification code is required");
+      }
+      
+      // Verify the email
+      const completeSignUp = await signUp.attemptEmailAddressVerification({
+        code,
+      });
+      
+      if (completeSignUp.status === "complete") {
+        await setActive({ session: completeSignUp.createdSessionId });
+        toast({
+          title: "Registration Successful",
+          description: `Welcome, ${values.name}!`,
+        });
+        navigate("/profile");
+      } else {
+        throw new Error("Something went wrong during registration.");
+      }
+    } catch (error: any) {
+      console.error("Error during registration:", error);
+      toast({
+        title: "Registration Error",
+        description: error.message || "An error occurred during registration.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -123,8 +175,8 @@ const Register = () => {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
-                Create account
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Creating account..." : "Create account"}
               </Button>
             </form>
           </Form>
