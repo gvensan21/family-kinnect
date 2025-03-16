@@ -15,16 +15,43 @@ if (!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY) {
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <ClerkProvider
-      publishableKey={PUBLISHABLE_KEY}
-      clerkJSVersion="5.56.0-snapshot.v20250312225817"
-      signInUrl="/login"
-      signUpUrl="/register"
-      signInFallbackRedirectUrl="/profile"
-      signUpFallbackRedirectUrl="/profile"
-      afterSignOutUrl="/"
-    >
-      <App />
-    </ClerkProvider>
+    <ErrorBoundary>
+      <ClerkProvider
+        publishableKey={PUBLISHABLE_KEY}
+        clerkJSVersion="5.56.0-snapshot.v20250312225817"
+        signInUrl="/login"
+        signUpUrl="/register"
+        signInFallbackRedirectUrl="/profile"
+        signUpFallbackRedirectUrl="/profile"
+        afterSignOutUrl="/"
+      >
+        <App />
+      </ClerkProvider>
+    </ErrorBoundary>
   </React.StrictMode>
 );
+
+// Custom Error Boundary component to catch authentication errors
+class ErrorBoundary extends React.Component {
+  state = { hasError: false, error: null };
+  
+  static getDerivedStateFromError(error: any) {
+    return { hasError: true, error };
+  }
+  
+  componentDidCatch(error: any, errorInfo: any) {
+    console.error("Authentication error caught by boundary:", error);
+    console.log("Error info:", errorInfo);
+  }
+  
+  render() {
+    if (this.state.hasError) {
+      // Authentication failed, but we still render the app in a non-authenticated state
+      return (
+        <App authError={true} />
+      );
+    }
+    
+    return this.props.children;
+  }
+}

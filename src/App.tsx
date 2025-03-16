@@ -17,16 +17,18 @@ import "./styles/familyTree.css";
 
 const queryClient = new QueryClient();
 
-// Protected route component with fallback for loading state
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+// Protected route component with fallback for loading state and auth errors
+const ProtectedRoute = ({ children, authError = false }: { children: React.ReactNode, authError?: boolean }) => {
   const { isSignedIn, isLoaded } = useAuth();
   
+  // If there's an auth error or Clerk failed to load, redirect to login
+  if (authError || (isLoaded && !isSignedIn)) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  // Show loading state while Clerk is initializing
   if (!isLoaded) {
     return <div className="flex h-screen items-center justify-center">Loading authentication...</div>;
-  }
-
-  if (!isSignedIn) {
-    return <Navigate to="/login" replace />;
   }
 
   return <>{children}</>;
@@ -57,7 +59,8 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-const App = () => (
+// Main App component that can accept an authError flag from the ErrorBoundary
+const App = ({ authError = false }: { authError?: boolean }) => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -71,7 +74,7 @@ const App = () => (
             path="/dashboard"
             element={
               <PageWrapper>
-                <ProtectedRoute>
+                <ProtectedRoute authError={authError}>
                   <Dashboard />
                 </ProtectedRoute>
               </PageWrapper>
@@ -81,7 +84,7 @@ const App = () => (
             path="/profile"
             element={
               <PageWrapper>
-                <ProtectedRoute>
+                <ProtectedRoute authError={authError}>
                   <Profile />
                 </ProtectedRoute>
               </PageWrapper>
