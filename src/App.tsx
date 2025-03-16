@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AppSidebar } from "./components/AppSidebar";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -28,14 +28,16 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => {
   
   // Apply sidebar to all other pages
   return (
-    <AppSidebar>
-      <div className="p-4">
-        <div className="flex justify-end mb-4">
-          <SidebarTrigger />
+    <SidebarProvider>
+      <AppSidebar>
+        <div className="p-4">
+          <div className="flex justify-end mb-4">
+            <SidebarTrigger />
+          </div>
+          {children}
         </div>
-        {children}
-      </div>
-    </AppSidebar>
+      </AppSidebar>
+    </SidebarProvider>
   );
 };
 

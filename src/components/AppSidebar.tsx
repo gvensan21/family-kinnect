@@ -21,8 +21,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarProvider,
-  useSidebar
 } from "@/components/ui/sidebar";
 
 export const AppSidebarContent = () => {
@@ -110,16 +108,12 @@ export const AppSidebarContent = () => {
 };
 
 export const AppSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { state } = useSidebar();
-  
   return (
-    <SidebarProvider>
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted flex w-full">
-        {state === "expanded" && <AppSidebarContent />}
-        <div className="flex-1">
-          {children}
-        </div>
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted flex w-full">
+      <AppSidebarContent />
+      <div className="flex-1">
+        {children}
       </div>
-    </SidebarProvider>
+    </div>
   );
 };
