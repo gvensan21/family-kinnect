@@ -1,9 +1,7 @@
 
 import React from "react";
-import { PanelLeft } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import NewFamilyTreeFlow from "@/components/FamilyTree";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const Dashboard = () => {
   return (
@@ -13,7 +11,6 @@ const Dashboard = () => {
           <h1 className="text-3xl font-bold">My Family Tree</h1>
           <p className="text-muted-foreground">Welcome back to GotraBandhus</p>
         </div>
-        <SidebarTrigger />
       </header>
 
       <Card className="h-[calc(100vh-10rem)]">
