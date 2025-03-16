@@ -5,7 +5,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
-import { useSignUp } from "@clerk/clerk-react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -18,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -37,11 +37,44 @@ const formSchema = z.object({
   path: ["confirmPassword"],
 });
 
+// Mock registration function when Clerk is not available
+const mockRegister = async (values: z.infer<typeof formSchema>, navigate: ReturnType<typeof useNavigate>) => {
+  // Simulate registration process
+  console.log("Mock registration with values:", values);
+  
+  // Show success toast
+  toast.success("Registration successful!", {
+    description: "This is a mock registration since authentication is not connected."
+  });
+  
+  // Navigate to login page after short delay
+  setTimeout(() => {
+    navigate("/login");
+  }, 1500);
+};
+
 const Register = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { isLoaded, signUp, setActive } = useSignUp();
   const [isLoading, setIsLoading] = React.useState(false);
+  const [clerkError, setClerkError] = React.useState(false);
+  
+  // Try to get Clerk's signup hook, but catch errors
+  let signUp: any = null;
+  let setActive: any = null;
+  let isLoaded = false;
+  
+  try {
+    // Dynamically import to avoid errors during component rendering
+    const { useSignUp } = require("@clerk/clerk-react");
+    const signUpHook = useSignUp();
+    signUp = signUpHook.signUp;
+    setActive = signUpHook.setActive;
+    isLoaded = signUpHook.isLoaded;
+  } catch (error) {
+    console.error("Clerk SignUp hook error:", error);
+    setClerkError(true);
+  }
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -54,14 +87,16 @@ const Register = () => {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!isLoaded) {
-      return;
-    }
-
     try {
       setIsLoading(true);
       
-      // Start the sign up process
+      // If Clerk is not available, use mock registration
+      if (clerkError || !isLoaded || !signUp) {
+        await mockRegister(values, navigate);
+        return;
+      }
+      
+      // Start the sign up process with Clerk
       await signUp.create({
         firstName: values.name.split(' ')[0],
         lastName: values.name.split(' ').slice(1).join(' ') || '',
@@ -117,7 +152,9 @@ const Register = () => {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
           <CardDescription>
-            Enter your information to create your account
+            {clerkError ? 
+              "Demo mode: Registration is simulated since authentication service is unavailable." : 
+              "Enter your information to create your account"}
           </CardDescription>
         </CardHeader>
         <CardContent>
