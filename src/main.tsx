@@ -13,6 +13,43 @@ if (!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY) {
   console.warn("Missing Clerk Publishable Key in environment variables. Using a dummy key for development.");
 }
 
+// Custom Error Boundary component to catch authentication errors
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+  
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error("Authentication error caught by boundary:", error);
+    console.log("Error info:", errorInfo);
+  }
+  
+  render() {
+    if (this.state.hasError) {
+      // Authentication failed, but we still render the app in a non-authenticated state
+      return (
+        <App authError={true} />
+      );
+    }
+    
+    return this.props.children;
+  }
+}
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ErrorBoundary>
@@ -30,28 +67,3 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     </ErrorBoundary>
   </React.StrictMode>
 );
-
-// Custom Error Boundary component to catch authentication errors
-class ErrorBoundary extends React.Component {
-  state = { hasError: false, error: null };
-  
-  static getDerivedStateFromError(error: any) {
-    return { hasError: true, error };
-  }
-  
-  componentDidCatch(error: any, errorInfo: any) {
-    console.error("Authentication error caught by boundary:", error);
-    console.log("Error info:", errorInfo);
-  }
-  
-  render() {
-    if (this.state.hasError) {
-      // Authentication failed, but we still render the app in a non-authenticated state
-      return (
-        <App authError={true} />
-      );
-    }
-    
-    return this.props.children;
-  }
-}
