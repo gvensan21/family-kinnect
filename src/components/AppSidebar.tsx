@@ -7,7 +7,8 @@ import {
   Search, 
   Users,
   Upload,
-  Globe
+  Globe,
+  LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,25 +22,30 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar
 } from "@/components/ui/sidebar";
 
 export const AppSidebarContent = () => {
   const location = useLocation();
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
 
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="px-2 py-4 flex items-center gap-2">
+        <div className={`px-2 py-4 flex items-center gap-2 ${isCollapsed ? "justify-center" : ""}`}>
           <Globe className="h-5 w-5" />
-          <div>
-            <h2 className="text-lg font-semibold">GotraBandhus</h2>
-            <p className="text-xs text-muted-foreground">Family Tree Manager</p>
-          </div>
+          {!isCollapsed && (
+            <div>
+              <h2 className="text-lg font-semibold">GotraBandhus</h2>
+              <p className="text-xs text-muted-foreground">Family Tree Manager</p>
+            </div>
+          )}
         </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          {!isCollapsed && <SidebarGroupLabel>Navigation</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
@@ -50,7 +56,7 @@ export const AppSidebarContent = () => {
                 >
                   <Link to="/dashboard">
                     <LayoutDashboard />
-                    <span>Dashboard</span>
+                    {!isCollapsed && <span>Dashboard</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -62,7 +68,7 @@ export const AppSidebarContent = () => {
                 >
                   <Link to="/profile">
                     <UserRound />
-                    <span>Profile</span>
+                    {!isCollapsed && <span>Profile</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -70,7 +76,7 @@ export const AppSidebarContent = () => {
                 <SidebarMenuButton asChild tooltip="Find Your Bandhu">
                   <Link to="#">
                     <Search />
-                    <span>Find Your Bandhu</span>
+                    {!isCollapsed && <span>Find Your Bandhu</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -78,7 +84,7 @@ export const AppSidebarContent = () => {
                 <SidebarMenuButton asChild tooltip="Connect Families">
                   <Link to="#">
                     <Users />
-                    <span>Connect Families</span>
+                    {!isCollapsed && <span>Connect Families</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -86,7 +92,7 @@ export const AppSidebarContent = () => {
                 <SidebarMenuButton asChild tooltip="Export">
                   <Link to="#">
                     <Upload />
-                    <span>Export</span>
+                    {!isCollapsed && <span>Export</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -95,10 +101,11 @@ export const AppSidebarContent = () => {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <div className="px-2 py-2">
-          <Button variant="outline" className="w-full justify-start" asChild>
+        <div className={`px-2 py-2 ${isCollapsed ? "flex justify-center" : ""}`}>
+          <Button variant="outline" className={`${isCollapsed ? "p-2 h-9 w-9" : "w-full justify-start"}`} asChild>
             <Link to="/">
-              <span>Sign Out</span>
+              <LogOut className="h-4 w-4" />
+              {!isCollapsed && <span className="ml-2">Sign Out</span>}
             </Link>
           </Button>
         </div>
