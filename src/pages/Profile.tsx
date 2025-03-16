@@ -19,7 +19,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -93,13 +92,12 @@ const Profile = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 fixed top-0">
       <header className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold">My Profile</h1>
           <p className="text-muted-foreground">Manage your personal information</p>
         </div>
-        <SidebarTrigger />
       </header>
 
       <Card>

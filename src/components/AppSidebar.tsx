@@ -33,15 +33,17 @@ export const AppSidebarContent = () => {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <div className={`px-2 py-4 flex items-center gap-2 ${isCollapsed ? "justify-center" : ""}`}>
-          <Globe className="h-5 w-5" />
-          {!isCollapsed && (
-            <div>
-              <h2 className="text-lg font-semibold">GotraBandhus</h2>
-              <p className="text-xs text-muted-foreground">Family Tree Manager</p>
-            </div>
-          )}
-        </div>
+        <Link to="/">
+          <div className={`px-2 py-4 flex items-center gap-2 ${isCollapsed ? "justify-center" : ""}`}>
+            <Globe className="h-5 w-5" />
+            {!isCollapsed && (
+              <div>
+                <h2 className="text-lg font-semibold">GotraBandhus</h2>
+                <p className="text-xs text-muted-foreground">Family Tree Manager</p>
+              </div>
+            )}
+          </div>
+        </Link>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
