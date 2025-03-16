@@ -1,209 +1,313 @@
+import React, { useEffect, useRef } from "react";
+import f3 from 'family-chart';
+import 'family-chart/styles/family-chart.css';
+import * as d3 from 'd3';
 
-import React, { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+// Add d3-transition dependency to make sure transitions work
+import 'd3-transition';
 
-// Sample family tree data
-const sampleFamilyData = {
-  id: "1",
-  name: "John Doe",
-  gender: "male",
-  birthYear: 1970,
-  children: [
-    {
-      id: "2",
-      name: "Sarah Doe",
-      gender: "female",
-      birthYear: 1995,
-      children: [],
-    },
-    {
-      id: "3",
-      name: "Michael Doe",
-      gender: "male",
-      birthYear: 1998,
-      children: [],
-    },
-  ],
-  siblings: [
-    {
-      id: "4",
-      name: "Jane Doe",
-      gender: "female",
-      birthYear: 1972,
-      children: [
-        {
-          id: "5",
-          name: "Robert Doe",
-          gender: "male",
-          birthYear: 2000,
-          children: [],
+const NewFamilyTreeFlow = () => {
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    
+    // Clear existing chart if any
+    d3.select(containerRef.current).selectAll("*").remove();
+    
+    const data = [
+      {
+        "id": "0",
+        "rels": {
+          "father": "8c1d55e9-c48d-43be-b506-b0ed068534f8",
+          "mother": "d086f8a8-a24d-45ef-afda-50c366e5873d",
+          "spouses": [
+            "d54828d1-a032-45cc-b60b-42ff73b1d154"
+          ],
+          "children": [
+            "3ac4a373-795b-4fa1-b378-e7ea0acae579",
+            "6bed0dfe-9240-4326-b0e1-a2f1293ce387"
+          ]
         },
-      ],
-    },
-  ],
-  spouse: {
-    id: "6",
-    name: "Mary Doe",
-    gender: "female",
-    birthYear: 1972,
-  },
-  father: {
-    id: "7",
-    name: "William Doe",
-    gender: "male",
-    birthYear: 1945,
-  },
-  mother: {
-    id: "8",
-    name: "Elizabeth Doe",
-    gender: "female",
-    birthYear: 1947,
-  },
+        "data": {
+          "first name": "GV",
+          "last name": "Surname",
+          "birthday": 1970,
+          "avatar": "https://static8.depositphotos.com/1009634/988/v/950/depositphotos_9883921-stock-illustration-no-user-profile-picture.jpg",
+          "gender": "M"
+        }
+      },
+      {
+        "id": "8c1d55e9-c48d-43be-b506-b0ed068534f8",
+        "data": {
+          "gender": "M",
+          "first name": "KV"
+        },
+        "rels": {
+          "children": [
+            "0",
+            "e2a17bbb-15a9-497d-a18d-c1df6ef43cd7"
+          ],
+          "spouses": [
+            "d086f8a8-a24d-45ef-afda-50c366e5873d"
+          ]
+        }
+      },
+      {
+        "id": "d086f8a8-a24d-45ef-afda-50c366e5873d",
+        "data": {
+          "gender": "F",
+          "first name": "VV"
+        },
+        "rels": {
+          "children": [
+            "0",
+            "e2a17bbb-15a9-497d-a18d-c1df6ef43cd7"
+          ],
+          "spouses": [
+            "8c1d55e9-c48d-43be-b506-b0ed068534f8"
+          ]
+        }
+      },
+      {
+        "id": "d54828d1-a032-45cc-b60b-42ff73b1d154",
+        "data": {
+          "gender": "F",
+          "first name": "AS"
+        },
+        "rels": {
+          "spouses": [
+            "0"
+          ],
+          "children": [
+            "3ac4a373-795b-4fa1-b378-e7ea0acae579",
+            "6bed0dfe-9240-4326-b0e1-a2f1293ce387"
+          ],
+          "father": "8e7852d8-0ee2-41f8-9b5a-44d737824831",
+          "mother": "6bb9ed14-d4fd-4527-9de4-6d18a0d00e8e"
+        }
+      },
+      {
+        "id": "3ac4a373-795b-4fa1-b378-e7ea0acae579",
+        "data": {
+          "gender": "F",
+          "first name": "SiV"
+        },
+        "rels": {
+          "father": "0",
+          "mother": "d54828d1-a032-45cc-b60b-42ff73b1d154"
+        }
+      },
+      {
+        "id": "6bed0dfe-9240-4326-b0e1-a2f1293ce387",
+        "data": {
+          "gender": "F",
+          "first name": "SaV"
+        },
+        "rels": {
+          "father": "0",
+          "mother": "d54828d1-a032-45cc-b60b-42ff73b1d154"
+        }
+      },
+      {
+        "id": "e2a17bbb-15a9-497d-a18d-c1df6ef43cd7",
+        "data": {
+          "gender": "M",
+          "first name": "PV"
+        },
+        "rels": {
+          "father": "8c1d55e9-c48d-43be-b506-b0ed068534f8",
+          "mother": "d086f8a8-a24d-45ef-afda-50c366e5873d",
+          "spouses": [
+            "5e2d6f9f-5011-4aa4-a266-574e5fcf9b46"
+          ],
+          "children": [
+            "0c808443-2e52-4b81-a950-7e436aca66b0",
+            "102f0ded-e7c6-46ba-96eb-cbcb48e2dce5"
+          ]
+        }
+      },
+      {
+        "id": "5e2d6f9f-5011-4aa4-a266-574e5fcf9b46",
+        "data": {
+          "gender": "F",
+          "first name": "SP"
+        },
+        "rels": {
+          "spouses": [
+            "e2a17bbb-15a9-497d-a18d-c1df6ef43cd7"
+          ],
+          "children": [
+            "0c808443-2e52-4b81-a950-7e436aca66b0",
+            "102f0ded-e7c6-46ba-96eb-cbcb48e2dce5"
+          ]
+        }
+      },
+      {
+        "id": "0c808443-2e52-4b81-a950-7e436aca66b0",
+        "data": {
+          "gender": "M",
+          "first name": "HP"
+        },
+        "rels": {
+          "father": "e2a17bbb-15a9-497d-a18d-c1df6ef43cd7",
+          "mother": "5e2d6f9f-5011-4aa4-a266-574e5fcf9b46"
+        }
+      },
+      {
+        "id": "102f0ded-e7c6-46ba-96eb-cbcb48e2dce5",
+        "data": {
+          "gender": "M",
+          "first name": "AP"
+        },
+        "rels": {
+          "father": "e2a17bbb-15a9-497d-a18d-c1df6ef43cd7",
+          "mother": "5e2d6f9f-5011-4aa4-a266-574e5fcf9b46"
+        }
+      },
+      {
+        "id": "8e7852d8-0ee2-41f8-9b5a-44d737824831",
+        "data": {
+          "gender": "M",
+          "first name": "VS"
+        },
+        "rels": {
+          "children": [
+            "d54828d1-a032-45cc-b60b-42ff73b1d154",
+            "75a23c75-03b6-4f8f-932a-a4af1e8106e1",
+            "53352ef8-d478-43c6-b852-3abdb9d4a368"
+          ],
+          "spouses": [
+            "6bb9ed14-d4fd-4527-9de4-6d18a0d00e8e"
+          ]
+        }
+      },
+      {
+        "id": "6bb9ed14-d4fd-4527-9de4-6d18a0d00e8e",
+        "data": {
+          "gender": "F",
+          "first name": "JS"
+        },
+        "rels": {
+          "children": [
+            "d54828d1-a032-45cc-b60b-42ff73b1d154",
+            "75a23c75-03b6-4f8f-932a-a4af1e8106e1",
+            "53352ef8-d478-43c6-b852-3abdb9d4a368"
+          ],
+          "spouses": [
+            "8e7852d8-0ee2-41f8-9b5a-44d737824831"
+          ]
+        }
+      },
+      {
+        "id": "75a23c75-03b6-4f8f-932a-a4af1e8106e1",
+        "data": {
+          "gender": "M",
+          "first name": "RS"
+        },
+        "rels": {
+          "father": "8e7852d8-0ee2-41f8-9b5a-44d737824831",
+          "mother": "6bb9ed14-d4fd-4527-9de4-6d18a0d00e8e"
+        }
+      },
+      {
+        "id": "53352ef8-d478-43c6-b852-3abdb9d4a368",
+        "data": {
+          "gender": "F",
+          "first name": "SS"
+        },
+        "rels": {
+          "father": "8e7852d8-0ee2-41f8-9b5a-44d737824831",
+          "mother": "6bb9ed14-d4fd-4527-9de4-6d18a0d00e8e",
+          "spouses": [
+            "c8e9fa3e-39c3-42d3-bf86-8e2758ba80a3"
+          ],
+          "children": [
+            "4fa5a17f-815e-437f-a405-1c6e013c3443",
+            "890a059a-2c3e-4a11-ad1e-c657cd203f74"
+          ]
+        }
+      },
+      {
+        "id": "c8e9fa3e-39c3-42d3-bf86-8e2758ba80a3",
+        "data": {
+          "gender": "M",
+          "first name": "SN"
+        },
+        "rels": {
+          "spouses": [
+            "53352ef8-d478-43c6-b852-3abdb9d4a368"
+          ],
+          "children": [
+            "4fa5a17f-815e-437f-a405-1c6e013c3443",
+            "890a059a-2c3e-4a11-ad1e-c657cd203f74"
+          ]
+        }
+      },
+      {
+        "id": "4fa5a17f-815e-437f-a405-1c6e013c3443",
+        "data": {
+          "gender": "M",
+          "first name": "MN"
+        },
+        "rels": {
+          "father": "53352ef8-d478-43c6-b852-3abdb9d4a368",
+          "mother": "c8e9fa3e-39c3-42d3-bf86-8e2758ba80a3"
+        }
+      },
+      {
+        "id": "890a059a-2c3e-4a11-ad1e-c657cd203f74",
+        "data": {
+          "gender": "F",
+          "first name": "SN"
+        },
+        "rels": {
+          "father": "53352ef8-d478-43c6-b852-3abdb9d4a368",
+          "mother": "c8e9fa3e-39c3-42d3-bf86-8e2758ba80a3"
+        }
+      }
+    ];
+    
+    try {
+      const f3Chart = f3.createChart('#FamilyChart', data)
+        .setTransitionTime(1000)
+        .setCardXSpacing(250)
+        .setCardYSpacing(150)
+        .setOrientationVertical()
+        .setSingleParentEmptyCard(true, {label: 'ADD'});
+    
+      const f3Card = f3Chart.setCard(f3.CardHtml)
+        .setCardDisplay([["first name"],[]])
+        .setCardDim({})
+        .setMiniTree(true)
+        .setStyle('imageRect')
+        .setOnHoverPathToMain();
+    
+      const f3EditTree = f3Chart.editTree()
+        .fixed(true)
+        .setFields(["first name"])
+        .setEditFirst(true);
+      
+      f3EditTree.setEdit();
+      
+      f3Card.setOnCardClick((e, d) => {
+        f3EditTree.open(d);
+        if (f3EditTree.isAddingRelative()) return;
+        f3Card.onCardClickDefault(e, d);
+      });
+    
+      f3Chart.updateTree({initial: true});
+      f3EditTree.open(f3Chart.getMainDatum());
+    
+      f3Chart.updateTree({initial: true});
+      
+      console.log("Family tree rendered successfully");
+    } catch (error) {
+      console.error("Error rendering family tree:", error);
+    }
+  }, []);
+
+  return <div className="f3 f3-cont h-full w-full" id="FamilyChart" ref={containerRef}></div>;
 };
 
-// FamilyMember component
-const FamilyMember = ({
-  member,
-  onSelect,
-}: {
-  member: any;
-  onSelect: (member: any) => void;
-}) => {
-  const genderColor = member.gender === "male" ? "bg-blue-100 border-blue-300" : "bg-pink-100 border-pink-300";
-
-  return (
-    <div
-      className={`p-3 rounded-lg ${genderColor} border cursor-pointer hover:shadow-md transition-shadow`}
-      onClick={() => onSelect(member)}
-    >
-      <h3 className="font-medium">{member.name}</h3>
-      <p className="text-xs text-gray-600">b. {member.birthYear}</p>
-    </div>
-  );
-};
-
-// Actual FamilyTree component
-const FamilyTree = () => {
-  const [selectedMember, setSelectedMember] = useState<any>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  const handleSelectMember = (member: any) => {
-    setSelectedMember(member);
-    setIsDialogOpen(true);
-  };
-
-  // In Phase 1, this is a simplified representation
-  // In later phases, we'll implement a more sophisticated visualization
-  return (
-    <div className="h-full overflow-auto p-6">
-      <Alert className="mb-6">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="h-4 w-4"
-        >
-          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-          <line x1="12" y1="9" x2="12" y2="13" />
-          <line x1="12" y1="17" x2="12.01" y2="17" />
-        </svg>
-        <AlertTitle>Family Tree Visualization</AlertTitle>
-        <AlertDescription>
-          This is a simplified visualization for Phase 1. Click on family members
-          to view details. In later phases, we'll implement a more sophisticated
-          interactive tree based on Family Chart.
-        </AlertDescription>
-      </Alert>
-
-      <div className="space-y-8">
-        <div className="space-y-2">
-          <h2 className="text-lg font-medium">Parents</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <FamilyMember
-              member={sampleFamilyData.father}
-              onSelect={handleSelectMember}
-            />
-            <FamilyMember
-              member={sampleFamilyData.mother}
-              onSelect={handleSelectMember}
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <h2 className="text-lg font-medium">You and Spouse</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <FamilyMember
-              member={sampleFamilyData}
-              onSelect={handleSelectMember}
-            />
-            <FamilyMember
-              member={sampleFamilyData.spouse}
-              onSelect={handleSelectMember}
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <h2 className="text-lg font-medium">Children</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {sampleFamilyData.children.map((child) => (
-              <FamilyMember
-                key={child.id}
-                member={child}
-                onSelect={handleSelectMember}
-              />
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <h2 className="text-lg font-medium">Siblings</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {sampleFamilyData.siblings.map((sibling) => (
-              <FamilyMember
-                key={sibling.id}
-                member={sibling}
-                onSelect={handleSelectMember}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <AlertDialogContent className="sm:max-w-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {selectedMember?.name}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              <div className="space-y-2 mt-2">
-                <p><strong>Gender:</strong> {selectedMember?.gender}</p>
-                <p><strong>Birth Year:</strong> {selectedMember?.birthYear}</p>
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="sm:justify-between">
-            <Button variant="outline" asChild>
-              <AlertDialogCancel>Close</AlertDialogCancel>
-            </Button>
-            <div className="flex gap-2">
-              <Button variant="outline">Edit</Button>
-              <AlertDialogAction>View Details</AlertDialogAction>
-            </div>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
-  );
-};
-
-export default FamilyTree;
+export default NewFamilyTreeFlow;

@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import FamilyTreeFlow from "@/components/FamilyTreeFlow";
+import NewFamilyTreeFlow from "@/components/FamilyTree";
 import {
   Sidebar,
   SidebarContent,
@@ -125,7 +125,7 @@ const Dashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="h-[calc(100%-5rem)] p-0">
-              <FamilyTreeFlow />
+              <NewFamilyTreeFlow />
             </CardContent>
           </Card>
         </div>

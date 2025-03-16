@@ -34,9 +34,6 @@ const Index = () => {
           </div>
           
           <div className="bg-card rounded-lg shadow-lg overflow-hidden flex items-center justify-center relative group">
-            <Link to="/dashboard1" className="absolute top-3 right-3 p-2 bg-primary/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" title="Go to Family Tree">
-              <ExternalLink className="h-5 w-5 text-primary" />
-            </Link>
             <div className="p-8 text-center">
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
