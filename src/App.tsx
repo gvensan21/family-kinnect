@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AppSidebar } from "./components/AppSidebar";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -15,7 +16,7 @@ import "./styles/familyTree.css";
 
 const queryClient = new QueryClient();
 
-// Wrapper component to conditionally add sidebar
+// Wrapper component to conditionally add sidebar and sidebar trigger
 const PageWrapper = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   const path = location.pathname;
@@ -26,7 +27,16 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => {
   }
   
   // Apply sidebar to all other pages
-  return <AppSidebar>{children}</AppSidebar>;
+  return (
+    <AppSidebar>
+      <div className="p-4">
+        <div className="flex justify-end mb-4">
+          <SidebarTrigger />
+        </div>
+        {children}
+      </div>
+    </AppSidebar>
+  );
 };
 
 const App = () => (

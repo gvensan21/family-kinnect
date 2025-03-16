@@ -7,7 +7,6 @@ import {
   Search, 
   Users,
   Upload,
-  PanelLeft,
   Globe
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,34 +22,21 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-  SidebarTrigger,
   useSidebar
 } from "@/components/ui/sidebar";
 
 export const AppSidebarContent = () => {
   const location = useLocation();
-  const { toggleSidebar } = useSidebar();
 
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="px-2 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Globe className="h-5 w-5" />
-            <div>
-              <h2 className="text-lg font-semibold">GotraBandhus</h2>
-              <p className="text-xs text-muted-foreground">Family Tree Manager</p>
-            </div>
+        <div className="px-2 py-4 flex items-center gap-2">
+          <Globe className="h-5 w-5" />
+          <div>
+            <h2 className="text-lg font-semibold">GotraBandhus</h2>
+            <p className="text-xs text-muted-foreground">Family Tree Manager</p>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7"
-            onClick={toggleSidebar}
-          >
-            <PanelLeft className="h-4 w-4" />
-            <span className="sr-only">Toggle Sidebar</span>
-          </Button>
         </div>
       </SidebarHeader>
       <SidebarContent>
@@ -124,10 +110,12 @@ export const AppSidebarContent = () => {
 };
 
 export const AppSidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { state } = useSidebar();
+  
   return (
     <SidebarProvider>
       <div className="min-h-screen bg-gradient-to-b from-background to-muted flex w-full">
-        <AppSidebarContent />
+        {state === "expanded" && <AppSidebarContent />}
         <div className="flex-1">
           {children}
         </div>
