@@ -96,7 +96,7 @@ const Profile = () => {
     queryKey: ['profile', userId],
     queryFn: getUserProfile,
     enabled: !!userId,
-    onSuccess: (data) => {
+    onSettled: (data) => {
       if (data) {
         // Reset form with existing data
         form.reset(data);
