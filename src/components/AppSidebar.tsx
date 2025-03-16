@@ -31,7 +31,7 @@ export const AppSidebarContent = () => {
   const isCollapsed = state === "collapsed";
 
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       <SidebarHeader>
         <div className={`px-2 py-4 flex items-center gap-2 ${isCollapsed ? "justify-center" : ""}`}>
           <Globe className="h-5 w-5" />
