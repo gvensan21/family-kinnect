@@ -95,14 +95,15 @@ const Profile = () => {
   const { data: profileData, isLoading } = useQuery({
     queryKey: ['profile', userId],
     queryFn: getUserProfile,
-    enabled: !!userId,
-    onSettled: (data) => {
-      if (data) {
-        // Reset form with existing data
-        form.reset(data);
-      }
-    }
+    enabled: !!userId
   });
+
+  // Update form with profile data when it's loaded
+  useEffect(() => {
+    if (profileData) {
+      form.reset(profileData);
+    }
+  }, [profileData, form]);
 
   // Mutation to save profile data
   const saveProfileMutation = useMutation({
