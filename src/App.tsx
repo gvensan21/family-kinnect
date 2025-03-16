@@ -17,12 +17,12 @@ import "./styles/familyTree.css";
 
 const queryClient = new QueryClient();
 
-// Protected route component
+// Protected route component with fallback for loading state
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isSignedIn, isLoaded } = useAuth();
   
   if (!isLoaded) {
-    return <div className="flex h-screen items-center justify-center">Loading...</div>;
+    return <div className="flex h-screen items-center justify-center">Loading authentication...</div>;
   }
 
   if (!isSignedIn) {

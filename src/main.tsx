@@ -5,11 +5,12 @@ import { ClerkProvider } from "@clerk/clerk-react";
 import App from "./App.tsx";
 import "./index.css";
 
-// Replace with your actual Clerk publishable key
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+// Use a default publishable key for development if environment variable is not set
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || "pk_test_dummy-key-for-development";
 
-if (!PUBLISHABLE_KEY) {
-  throw new Error("Missing Clerk Publishable Key");
+// We'll still log a warning if the actual key is missing
+if (!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY) {
+  console.warn("Missing Clerk Publishable Key in environment variables. Using a dummy key for development.");
 }
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
