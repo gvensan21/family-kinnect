@@ -1,6 +1,6 @@
 
 import { User } from "../types/user";
-import { connectToDatabase, COLLECTIONS } from "../lib/mongodb";
+import { connectToDatabase, COLLECTIONS, generateUUID } from "../lib/mongodb";
 
 // API functions for authentication
 export const AuthAPI = {
@@ -16,7 +16,7 @@ export const AuthAPI = {
     }
     
     // Generate UUID for user ID
-    const userId = crypto.randomUUID();
+    const userId = generateUUID();
     
     // In a real app, we would hash the password here
     const newUser: User = {
@@ -28,14 +28,14 @@ export const AuthAPI = {
       updatedAt: new Date().toISOString(),
     };
     
-    // Save to MongoDB
+    // Save to database
     await db.collection(COLLECTIONS.USERS).insertOne(newUser);
     
     console.log("User registered:", { ...newUser, password: "***" });
     
     // Return user without password
     const { password, ...userWithoutPassword } = newUser;
-    return userWithoutPassword;
+    return userWithoutPassword as User;
   },
   
   // Login a user
@@ -49,12 +49,12 @@ export const AuthAPI = {
       throw new Error("No user found with this email");
     }
     
-    // Check password (in a real app, we would compare hashed passwords)
+    // Check password
     if (user.password !== credentials.password) {
       throw new Error("Invalid password");
     }
     
-    // Convert MongoDB document to User type and remove password
+    // Convert database document to User type
     const userWithCorrectType: User = {
       id: user.id,
       name: user.name,
@@ -63,7 +63,7 @@ export const AuthAPI = {
       updatedAt: user.updatedAt
     };
     
-    console.log("User logged in:", { ...userWithCorrectType });
+    console.log("User logged in:", userWithCorrectType);
     return userWithCorrectType;
   },
 };

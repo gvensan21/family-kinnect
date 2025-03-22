@@ -58,7 +58,7 @@ export const FamilyTreeAPI = {
       return [];
     }
     
-    // Convert MongoDB document to FamilyMember type
+    // Convert database document to FamilyMember type
     const familyMember: FamilyMember = {
       id: currentUser.id,
       name: currentUser.name,

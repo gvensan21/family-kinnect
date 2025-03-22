@@ -1,16 +1,16 @@
 
 /**
- * This file is now just a proxy to the real MongoDB implementation.
+ * This file is a proxy to the actual database implementation.
  * It is kept for backward compatibility.
  * 
- * We now use a proper MongoDB connection.
+ * We now use a hybrid MongoDB/browser-compatible implementation.
  * See lib/mongodb.ts for the implementation.
  */
 
 import { User, FamilyMember } from "../types/user";
 import { connectToDatabase, COLLECTIONS } from "../lib/mongodb";
 
-// This is kept as a proxy to the real MongoDB implementation
+// This is kept as a proxy to the real database implementation
 const mockDB = {
   // These methods are no longer used directly but kept for compatibility
   users: {
@@ -18,7 +18,7 @@ const mockDB = {
       console.warn("Using deprecated mockDB.users.get - use MongoDB methods directly instead");
       const { db } = await connectToDatabase();
       const user = await db.collection(COLLECTIONS.USERS).findOne({ id });
-      return user as unknown as User;
+      return user as User;
     },
     set: async (id: string, user: User): Promise<void> => {
       console.warn("Using deprecated mockDB.users.set - use MongoDB methods directly instead");
@@ -31,7 +31,7 @@ const mockDB = {
       console.warn("Using deprecated mockDB.familyMembers.get - use MongoDB methods directly instead");
       const { db } = await connectToDatabase();
       const member = await db.collection(COLLECTIONS.FAMILY_MEMBERS).findOne({ id });
-      return member as unknown as FamilyMember;
+      return member as FamilyMember;
     },
     set: async (id: string, member: FamilyMember): Promise<void> => {
       console.warn("Using deprecated mockDB.familyMembers.set - use MongoDB methods directly instead");
