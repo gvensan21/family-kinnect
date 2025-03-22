@@ -1,6 +1,7 @@
 
 import { FamilyMember } from "../types/user";
 import { connectToDatabase, COLLECTIONS } from "../lib/mongodb";
+import { WithId, Document } from "mongodb";
 
 export const FamilyTreeAPI = {
   // Save profile data and create user node
@@ -58,9 +59,30 @@ export const FamilyTreeAPI = {
       return [];
     }
     
+    // Convert MongoDB document to FamilyMember type
+    const familyMember: FamilyMember = {
+      id: currentUser.id,
+      name: currentUser.name,
+      gender: currentUser.gender,
+      dateOfBirth: currentUser.dateOfBirth,
+      gotra: currentUser.gotra,
+      pravara: currentUser.pravara,
+      currentCity: currentUser.currentCity,
+      currentState: currentUser.currentState,
+      currentCountry: currentUser.currentCountry,
+      occupation: currentUser.occupation,
+      bio: currentUser.bio,
+      email: currentUser.email,
+      phone: currentUser.phone,
+      parentId: currentUser.parentId,
+      spouseId: currentUser.spouseId,
+      children: currentUser.children || [],
+      profileData: currentUser.profileData,
+    };
+    
     // For now, we'll return just the user as a single node
     // In a real app, we would query for related family members here
-    return [currentUser];
+    return [familyMember];
   },
 
   // Get user profile

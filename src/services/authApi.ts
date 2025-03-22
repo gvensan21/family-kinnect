@@ -1,6 +1,7 @@
 
 import { User } from "../types/user";
 import { connectToDatabase, COLLECTIONS } from "../lib/mongodb";
+import { WithId, Document } from "mongodb";
 
 // API functions for authentication
 export const AuthAPI = {
@@ -48,7 +49,16 @@ export const AuthAPI = {
       throw new Error("Invalid password");
     }
     
-    console.log("User logged in:", { ...user, password: "***" });
-    return { ...user, password: undefined }; // Remove password from returned user
+    // Convert MongoDB document to User type
+    const userWithCorrectType: User = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    };
+    
+    console.log("User logged in:", { ...userWithCorrectType, password: "***" });
+    return userWithCorrectType; // Password already removed
   },
 };
