@@ -4,8 +4,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth, useUser } from "@clerk/clerk-react";
-import { useFamilyTree } from "@/services/api";
+import { useLocalAuth } from "@/contexts/AuthContext"; 
+import { useFamilyTree } from "@/hooks/useFamilyTree";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { profileFormSchema, type ProfileFormValues } from "@/schemas/profileSchema";
 import { Form } from "@/components/ui/form";
@@ -21,16 +21,15 @@ import { PrivacySection } from "./PrivacySection";
 export const ProfileForm = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { userId } = useAuth();
-  const { user } = useUser();
+  const { currentUser } = useLocalAuth();
   const { saveProfileAndCreateNode, getUserProfile } = useFamilyTree();
   
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      name: user?.fullName || "",
+      name: currentUser?.name || "",
       nickname: "",
-      email: user?.primaryEmailAddress?.emailAddress || "",
+      email: currentUser?.email || "",
       phone: "",
       gender: "male",
       dateOfBirth: "",
@@ -57,9 +56,9 @@ export const ProfileForm = () => {
 
   // Query to fetch existing profile data
   const { data: profileData, isLoading } = useQuery({
-    queryKey: ['profile', userId],
+    queryKey: ['profile', currentUser?.id],
     queryFn: getUserProfile,
-    enabled: !!userId
+    enabled: !!currentUser?.id
   });
 
   // Update form with profile data when it's loaded
