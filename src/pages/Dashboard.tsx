@@ -5,16 +5,16 @@ import NewFamilyTreeFlow from "@/components/FamilyTree";
 import { useQuery } from "@tanstack/react-query";
 import { useFamilyTree } from "@/hooks/useFamilyTree";
 import { FamilyMember } from "@/types/user";
-import { useAuth } from "@clerk/clerk-react";
+import { useLocalAuth } from "@/contexts/AuthContext";
 
 const Dashboard = () => {
-  const { userId } = useAuth();
+  const { currentUser } = useLocalAuth();
   const { getFamilyTree } = useFamilyTree();
 
   const { data: familyData, isLoading, error } = useQuery({
-    queryKey: ['familyTree', userId],
+    queryKey: ['familyTree', currentUser?.id],
     queryFn: getFamilyTree,
-    enabled: !!userId,
+    enabled: !!currentUser?.id,
   });
 
   return (
