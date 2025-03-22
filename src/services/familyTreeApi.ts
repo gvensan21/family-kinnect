@@ -1,11 +1,13 @@
 
 import { FamilyMember } from "../types/user";
-import mockDB from "./mockDatabase";
+import { connectToDatabase, COLLECTIONS } from "../lib/mongodb";
 
 export const FamilyTreeAPI = {
   // Save profile data and create user node
   saveProfileAndCreateNode: async (userId: string, profileData: Record<string, any>): Promise<FamilyMember> => {
-    // In a real application, this would be a database call
+    const { db } = await connectToDatabase();
+    
+    // Create the family member object
     const member: FamilyMember = {
       id: userId,
       name: profileData.name || "User",
@@ -26,8 +28,19 @@ export const FamilyTreeAPI = {
       profileData: profileData,
     };
 
-    // Save to mock database
-    mockDB.familyMembers.set(userId, member);
+    // Check if member already exists, update if it does
+    const existingMember = await db.collection(COLLECTIONS.FAMILY_MEMBERS).findOne({ id: userId });
+    
+    if (existingMember) {
+      // Update existing record
+      await db.collection(COLLECTIONS.FAMILY_MEMBERS).updateOne(
+        { id: userId },
+        { $set: member }
+      );
+    } else {
+      // Insert new record
+      await db.collection(COLLECTIONS.FAMILY_MEMBERS).insertOne(member);
+    }
     
     console.log("Member saved:", member);
     return member;
@@ -35,25 +48,27 @@ export const FamilyTreeAPI = {
 
   // Get family tree for a user
   getFamilyTree: async (userId: string): Promise<FamilyMember[]> => {
-    // In a real application, this would be a database query
-    // to get the user's family tree
+    const { db } = await connectToDatabase();
     
-    // Check if user exists in mock database
-    const currentUser = mockDB.familyMembers.get(userId);
+    // Check if user exists in database
+    const currentUser = await db.collection(COLLECTIONS.FAMILY_MEMBERS).findOne({ id: userId });
     
     if (!currentUser) {
       // Return empty array if user doesn't exist
       return [];
     }
     
-    // For demo, we'll return the user as a single node
+    // For now, we'll return just the user as a single node
+    // In a real app, we would query for related family members here
     return [currentUser];
   },
 
   // Get user profile
   getUserProfile: async (userId: string): Promise<Record<string, any> | null> => {
-    // In a real application, this would be a database query
-    const member = mockDB.familyMembers.get(userId);
+    const { db } = await connectToDatabase();
+    
+    // Find the family member
+    const member = await db.collection(COLLECTIONS.FAMILY_MEMBERS).findOne({ id: userId });
     
     if (!member) {
       return null;

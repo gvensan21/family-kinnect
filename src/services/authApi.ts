@@ -1,16 +1,17 @@
 
 import { User } from "../types/user";
-import mockDB from "./mockDatabase";
+import { connectToDatabase, COLLECTIONS } from "../lib/mongodb";
 
 // API functions for authentication
 export const AuthAPI = {
   // Register a new user
   register: async (userData: { name: string; email: string; password: string }): Promise<User> => {
-    // Check if user with email already exists
-    const existingUsers = Array.from(mockDB.users.values());
-    const userExists = existingUsers.some(user => user.email === userData.email);
+    const { db } = await connectToDatabase();
     
-    if (userExists) {
+    // Check if user with email already exists
+    const existingUser = await db.collection(COLLECTIONS.USERS).findOne({ email: userData.email });
+    
+    if (existingUser) {
       throw new Error("A user with this email already exists");
     }
     
@@ -24,8 +25,8 @@ export const AuthAPI = {
       updatedAt: new Date().toISOString(),
     };
     
-    // Save to mock database
-    mockDB.users.set(newUser.id, newUser);
+    // Save to MongoDB
+    await db.collection(COLLECTIONS.USERS).insertOne(newUser);
     
     console.log("User registered:", { ...newUser, password: "***" });
     return { ...newUser, password: undefined }; // Remove password from returned user
@@ -33,9 +34,10 @@ export const AuthAPI = {
   
   // Login a user
   login: async (credentials: { email: string; password: string }): Promise<User> => {
+    const { db } = await connectToDatabase();
+    
     // Find user by email
-    const existingUsers = Array.from(mockDB.users.values());
-    const user = existingUsers.find(user => user.email === credentials.email);
+    const user = await db.collection(COLLECTIONS.USERS).findOne({ email: credentials.email });
     
     if (!user) {
       throw new Error("No user found with this email");
