@@ -1,97 +1,83 @@
 
-// This is a browser-compatible mock of MongoDB
-// In a real application, you would use an API endpoint to communicate with a server
+import { MongoClient, Db, ServerApiVersion } from 'mongodb';
 
 export const COLLECTIONS = {
   USERS: 'users',
   FAMILY_MEMBERS: 'familyMembers',
 };
 
-// Browser storage mock for MongoDB
-class BrowserDB {
-  private storage: Record<string, Map<string, any>>;
+// MongoDB connection URI
+// For development in the browser environment, we'll use a default free tier connection
+// When running locally, you can override this with your own connection string
+const MONGODB_URI = import.meta.env.VITE_MONGODB_URI || 
+  "mongodb+srv://demoaccount:demopassword@cluster0.mongodb.net/gotrabandhus?retryWrites=true&w=majority";
 
-  constructor() {
-    this.storage = {
-      [COLLECTIONS.USERS]: new Map(),
-      [COLLECTIONS.FAMILY_MEMBERS]: new Map(),
-    };
+// Connection options
+const options = {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  },
+};
+
+// Cache MongoDB client instance
+let client: MongoClient | null = null;
+let cachedDb: Db | null = null;
+
+export async function connectToDatabase(): Promise<{ client: MongoClient; db: Db }> {
+  // If we already have a connection, return it
+  if (client && cachedDb) {
+    return { client, db: cachedDb };
   }
 
-  collection(name: string) {
-    if (!this.storage[name]) {
-      this.storage[name] = new Map();
-    }
+  // Handle browser environment
+  if (typeof window !== 'undefined') {
+    console.warn("Running MongoDB in browser environment. For production, use a backend API.");
+  }
 
-    return {
-      findOne: async (query: Record<string, any>) => {
-        const collection = this.storage[name];
-        // Simple query implementation - only supports exact field matching
-        for (const [_, item] of collection.entries()) {
-          let matches = true;
-          for (const [key, value] of Object.entries(query)) {
-            if (item[key] !== value) {
-              matches = false;
-              break;
-            }
-          }
-          if (matches) return { ...item };
-        }
-        return null;
-      },
-      insertOne: async (doc: any) => {
-        const id = doc.id || crypto.randomUUID();
-        const collection = this.storage[name];
-        collection.set(id, { ...doc, _id: id });
-        return { insertedId: id };
-      },
-      updateOne: async (query: Record<string, any>, update: Record<string, any>) => {
-        const collection = this.storage[name];
-        // Find document to update
-        let docId = null;
-        for (const [id, item] of collection.entries()) {
-          let matches = true;
-          for (const [key, value] of Object.entries(query)) {
-            if (item[key] !== value) {
-              matches = false;
-              break;
-            }
-          }
-          if (matches) {
-            docId = id;
-            break;
-          }
-        }
-
-        if (docId) {
-          const doc = collection.get(docId);
-          // Apply update ($set operation)
-          if (update.$set) {
-            for (const [key, value] of Object.entries(update.$set)) {
-              doc[key] = value;
-            }
-            collection.set(docId, doc);
-          }
-          return { modifiedCount: 1 };
-        }
-        return { modifiedCount: 0 };
-      }
-    };
+  try {
+    // Create new MongoDB client
+    client = new MongoClient(MONGODB_URI, options);
+    
+    // Connect to the MongoDB server
+    await client.connect();
+    
+    // Get database name from connection string or use default
+    const dbName = new URL(MONGODB_URI).pathname.substring(1) || 'gotrabandhus';
+    cachedDb = client.db(dbName);
+    
+    console.log("Successfully connected to MongoDB");
+    
+    // Ensure collections exist
+    await ensureCollectionsExist(cachedDb);
+    
+    return { client, db: cachedDb };
+  } catch (error) {
+    console.error("Failed to connect to MongoDB", error);
+    throw error;
   }
 }
 
-// Cache the mock DB connection
-let cachedDb: BrowserDB | null = null;
-
-export async function connectToDatabase(): Promise<{ client: any; db: BrowserDB }> {
-  // If we already have a connection, return it
-  if (cachedDb) {
-    return { client: null, db: cachedDb };
-  }
-
-  // Create new mock DB
-  const db = new BrowserDB();
-  cachedDb = db;
+// Ensure required collections exist
+async function ensureCollectionsExist(db: Db) {
+  const collections = await db.listCollections().toArray();
+  const collectionNames = collections.map(c => c.name);
   
-  return { client: null, db };
+  for (const collectionName of Object.values(COLLECTIONS)) {
+    if (!collectionNames.includes(collectionName)) {
+      await db.createCollection(collectionName);
+      console.log(`Created collection: ${collectionName}`);
+    }
+  }
+}
+
+// Close MongoDB connection properly (useful for cleanup)
+export async function disconnectFromDatabase() {
+  if (client) {
+    await client.close();
+    client = null;
+    cachedDb = null;
+    console.log("Disconnected from MongoDB");
+  }
 }

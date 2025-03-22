@@ -16,7 +16,7 @@ export const AuthAPI = {
     }
     
     // Generate UUID for user ID
-    const userId = self.crypto.randomUUID();
+    const userId = crypto.randomUUID();
     
     // In a real app, we would hash the password here
     const newUser: User = {
@@ -28,21 +28,14 @@ export const AuthAPI = {
       updatedAt: new Date().toISOString(),
     };
     
-    // Save to our mock MongoDB
+    // Save to MongoDB
     await db.collection(COLLECTIONS.USERS).insertOne(newUser);
     
     console.log("User registered:", { ...newUser, password: "***" });
     
     // Return user without password
-    const returnUser: User = {
-      id: newUser.id,
-      name: newUser.name,
-      email: newUser.email,
-      createdAt: newUser.createdAt,
-      updatedAt: newUser.updatedAt,
-    };
-    
-    return returnUser;
+    const { password, ...userWithoutPassword } = newUser;
+    return userWithoutPassword;
   },
   
   // Login a user
@@ -61,7 +54,7 @@ export const AuthAPI = {
       throw new Error("Invalid password");
     }
     
-    // Convert MongoDB document to User type
+    // Convert MongoDB document to User type and remove password
     const userWithCorrectType: User = {
       id: user.id,
       name: user.name,
@@ -70,7 +63,7 @@ export const AuthAPI = {
       updatedAt: user.updatedAt
     };
     
-    console.log("User logged in:", { ...userWithCorrectType, password: "***" });
-    return userWithCorrectType; // Password already removed
+    console.log("User logged in:", { ...userWithCorrectType });
+    return userWithCorrectType;
   },
 };
