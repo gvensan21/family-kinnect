@@ -1,7 +1,6 @@
 
 import { User } from "../types/user";
 import { connectToDatabase, COLLECTIONS } from "../lib/mongodb";
-import { WithId, Document } from "mongodb";
 
 // API functions for authentication
 export const AuthAPI = {
@@ -16,9 +15,12 @@ export const AuthAPI = {
       throw new Error("A user with this email already exists");
     }
     
+    // Generate UUID for user ID
+    const userId = self.crypto.randomUUID();
+    
     // In a real app, we would hash the password here
     const newUser: User = {
-      id: crypto.randomUUID(),
+      id: userId,
       name: userData.name,
       email: userData.email,
       password: userData.password, // In a real app, this would be hashed
@@ -26,11 +28,21 @@ export const AuthAPI = {
       updatedAt: new Date().toISOString(),
     };
     
-    // Save to MongoDB
+    // Save to our mock MongoDB
     await db.collection(COLLECTIONS.USERS).insertOne(newUser);
     
     console.log("User registered:", { ...newUser, password: "***" });
-    return { ...newUser, password: undefined }; // Remove password from returned user
+    
+    // Return user without password
+    const returnUser: User = {
+      id: newUser.id,
+      name: newUser.name,
+      email: newUser.email,
+      createdAt: newUser.createdAt,
+      updatedAt: newUser.updatedAt,
+    };
+    
+    return returnUser;
   },
   
   // Login a user

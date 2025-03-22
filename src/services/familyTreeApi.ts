@@ -1,7 +1,6 @@
 
 import { FamilyMember } from "../types/user";
 import { connectToDatabase, COLLECTIONS } from "../lib/mongodb";
-import { WithId, Document } from "mongodb";
 
 export const FamilyTreeAPI = {
   // Save profile data and create user node
@@ -63,7 +62,7 @@ export const FamilyTreeAPI = {
     const familyMember: FamilyMember = {
       id: currentUser.id,
       name: currentUser.name,
-      gender: currentUser.gender,
+      gender: currentUser.gender || "unknown",
       dateOfBirth: currentUser.dateOfBirth,
       gotra: currentUser.gotra,
       pravara: currentUser.pravara,
