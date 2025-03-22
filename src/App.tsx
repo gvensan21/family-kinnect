@@ -59,8 +59,13 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+// Interface for App props
+interface AppProps {
+  authError?: boolean;
+}
+
 // Main App component
-const App = () => (
+const App = ({ authError }: AppProps = {}) => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
