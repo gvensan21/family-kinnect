@@ -5,6 +5,7 @@ import { connectToDatabase, COLLECTIONS } from "../lib/mongodb";
 export const FamilyTreeAPI = {
   // Save profile data and create user node
   saveProfileAndCreateNode: async (userId: string, profileData: Record<string, any>): Promise<FamilyMember> => {
+    console.log("Saving profile for user:", userId);
     const { db } = await connectToDatabase();
     
     // Create the family member object
@@ -37,9 +38,11 @@ export const FamilyTreeAPI = {
         { id: userId },
         { $set: member }
       );
+      console.log("Updated existing family member:", userId);
     } else {
       // Insert new record
       await db.collection(COLLECTIONS.FAMILY_MEMBERS).insertOne(member);
+      console.log("Created new family member:", userId);
     }
     
     console.log("Member saved:", member);
@@ -48,13 +51,14 @@ export const FamilyTreeAPI = {
 
   // Get family tree for a user
   getFamilyTree: async (userId: string): Promise<FamilyMember[]> => {
+    console.log("Getting family tree for user:", userId);
     const { db } = await connectToDatabase();
     
     // Check if user exists in database
     const currentUser = await db.collection(COLLECTIONS.FAMILY_MEMBERS).findOne({ id: userId });
     
     if (!currentUser) {
-      // Return empty array if user doesn't exist
+      console.log("No family member found for user:", userId);
       return [];
     }
     
@@ -79,22 +83,24 @@ export const FamilyTreeAPI = {
       profileData: currentUser.profileData,
     };
     
-    // For now, we'll return just the user as a single node
-    // In a real app, we would query for related family members here
+    console.log("Returning family member:", familyMember);
     return [familyMember];
   },
 
   // Get user profile
   getUserProfile: async (userId: string): Promise<Record<string, any> | null> => {
+    console.log("Getting profile for user:", userId);
     const { db } = await connectToDatabase();
     
     // Find the family member
     const member = await db.collection(COLLECTIONS.FAMILY_MEMBERS).findOne({ id: userId });
     
     if (!member) {
+      console.log("No profile found for user:", userId);
       return null;
     }
     
+    console.log("Found profile for user:", userId);
     return member.profileData || {};
   },
 };

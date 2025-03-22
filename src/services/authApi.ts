@@ -6,6 +6,7 @@ import { connectToDatabase, COLLECTIONS, generateUUID } from "../lib/mongodb";
 export const AuthAPI = {
   // Register a new user
   register: async (userData: { name: string; email: string; password: string }): Promise<User> => {
+    console.log("Registering user:", userData.email);
     const { db } = await connectToDatabase();
     
     // Check if user with email already exists
@@ -40,17 +41,20 @@ export const AuthAPI = {
   
   // Login a user
   login: async (credentials: { email: string; password: string }): Promise<User> => {
+    console.log("Login attempt for:", credentials.email);
     const { db } = await connectToDatabase();
     
     // Find user by email
     const user = await db.collection(COLLECTIONS.USERS).findOne({ email: credentials.email });
     
     if (!user) {
+      console.log("No user found with email:", credentials.email);
       throw new Error("No user found with this email");
     }
     
     // Check password
     if (user.password !== credentials.password) {
+      console.log("Invalid password for user:", credentials.email);
       throw new Error("Invalid password");
     }
     

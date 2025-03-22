@@ -1,5 +1,4 @@
 
-import { MongoClient, Db, ServerApiVersion } from 'mongodb';
 import { User, FamilyMember } from "../types/user";
 
 export const COLLECTIONS = {
@@ -16,6 +15,7 @@ class BrowserMongoDBSimulator {
     Object.values(COLLECTIONS).forEach(collName => {
       this.collections[collName] = new Map();
     });
+    console.log("Browser MongoDB simulator initialized");
   }
   
   collection(name: string) {
@@ -25,16 +25,22 @@ class BrowserMongoDBSimulator {
     
     return {
       findOne: async (query: any) => {
-        const id = query.id;
+        console.log(`BrowserDB: findOne in ${name}`, query);
+        const id = query.id || (query.email ? query.email : null);
+        if (!id) return null;
         return this.collections[name].get(id) || null;
       },
       find: async () => {
+        console.log(`BrowserDB: find all in ${name}`);
         return {
           toArray: async () => Array.from(this.collections[name].values())
         };
       },
       updateOne: async (query: any, update: any, options: any = {}) => {
-        const id = query.id;
+        console.log(`BrowserDB: updateOne in ${name}`, query, update);
+        const id = query.id || (query.email ? query.email : null);
+        if (!id) return { acknowledged: false };
+        
         const existingItem = this.collections[name].get(id);
         
         if (existingItem || options.upsert) {
@@ -44,11 +50,16 @@ class BrowserMongoDBSimulator {
         return { acknowledged: true };
       },
       insertOne: async (doc: any) => {
-        this.collections[name].set(doc.id, doc);
-        return { acknowledged: true, insertedId: doc.id };
+        console.log(`BrowserDB: insertOne in ${name}`, doc);
+        const id = doc.id || doc.email;
+        this.collections[name].set(id, doc);
+        return { acknowledged: true, insertedId: id };
       },
       deleteOne: async (query: any) => {
-        const id = query.id;
+        console.log(`BrowserDB: deleteOne in ${name}`, query);
+        const id = query.id || (query.email ? query.email : null);
+        if (!id) return { acknowledged: false, deletedCount: 0 };
+        
         this.collections[name].delete(id);
         return { acknowledged: true, deletedCount: 1 };
       }
@@ -69,106 +80,50 @@ class BrowserMongoDBSimulator {
   }
 }
 
-// MongoDB connection URI - use env var if available
-const MONGODB_URI = import.meta.env.VITE_MONGODB_URI || 
-  "mongodb+srv://demoaccount:demopassword@cluster0.mongodb.net/gotrabandhus?retryWrites=true&w=majority";
-
-// Connection options
-const options = {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  },
-};
-
 // Cache client instance
-let client: MongoClient | null = null;
-let cachedDb: Db | null = null;
 let browserDb: BrowserMongoDBSimulator | null = null;
 
 export async function connectToDatabase(): Promise<{ client: any; db: any }> {
   // If we already have a connection, return it
-  if (client && cachedDb) {
-    return { client, db: cachedDb };
-  }
-  
   if (browserDb) {
     return { client: null, db: browserDb };
   }
   
-  // Check if running in browser environment
-  const isBrowser = typeof window !== 'undefined';
-
-  try {
-    if (isBrowser) {
-      console.warn("Running in browser environment. Using in-memory database simulation.");
-      browserDb = new BrowserMongoDBSimulator();
-      return { client: null, db: browserDb };
-    } else {
-      // Create new MongoDB client
-      client = new MongoClient(MONGODB_URI, options);
-      
-      // Connect to the MongoDB server
-      await client.connect();
-      
-      // Get database name from connection string or use default
-      const dbName = new URL(MONGODB_URI).pathname.substring(1) || 'gotrabandhus';
-      cachedDb = client.db(dbName);
-      
-      console.log("Successfully connected to MongoDB");
-      
-      // Ensure collections exist
-      await ensureCollectionsExist(cachedDb);
-      
-      return { client, db: cachedDb };
-    }
-  } catch (error) {
-    console.error("Failed to connect to MongoDB", error);
-    // Fallback to in-memory store on connection error
-    if (!browserDb) {
-      console.warn("Falling back to in-memory database");
-      browserDb = new BrowserMongoDBSimulator();
-    }
-    return { client: null, db: browserDb };
+  console.log("Creating new browser-compatible MongoDB simulation");
+  browserDb = new BrowserMongoDBSimulator();
+  
+  // Initialize with some sample data if needed
+  const usersCollection = browserDb.collection(COLLECTIONS.USERS);
+  
+  // Check if we need to add sample user
+  const adminUser = await usersCollection.findOne({ email: "admin@example.com" });
+  if (!adminUser) {
+    await usersCollection.insertOne({
+      id: generateUUID(),
+      name: "Admin User",
+      email: "admin@example.com",
+      password: "password", 
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+    console.log("Added sample user to browser DB");
   }
-}
-
-// Ensure required collections exist
-async function ensureCollectionsExist(db: any) {
-  try {
-    const collections = await db.listCollections().toArray();
-    const collectionNames = collections.map((c: any) => c.name);
-    
-    for (const collectionName of Object.values(COLLECTIONS)) {
-      if (!collectionNames.includes(collectionName)) {
-        await db.createCollection(collectionName);
-        console.log(`Created collection: ${collectionName}`);
-      }
-    }
-  } catch (error) {
-    console.error("Error ensuring collections exist:", error);
-  }
+  
+  return { client: null, db: browserDb };
 }
 
 // Close connection properly
 export async function disconnectFromDatabase() {
-  if (client) {
-    await client.close();
-    client = null;
-    cachedDb = null;
-    console.log("Disconnected from MongoDB");
-  }
-  // Clear browser DB
   browserDb = null;
+  console.log("Disconnected from browser MongoDB simulation");
 }
 
-// Generate a UUID compatible with both browser and Node.js
+// Generate a UUID compatible with browser environments
 export function generateUUID(): string {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID();
+  if (typeof self !== 'undefined' && self.crypto && self.crypto.randomUUID) {
+    return self.crypto.randomUUID();
   }
-  // Fallback UUID implementation for older browsers
+  // Fallback implementation
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
     const r = Math.random() * 16 | 0;
     const v = c === 'x' ? r : (r & 0x3 | 0x8);
