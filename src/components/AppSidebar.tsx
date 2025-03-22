@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { 
   UserRound, 
   LayoutDashboard, 
@@ -10,7 +10,6 @@ import {
   Globe,
   LogOut
 } from "lucide-react";
-import { useClerk } from "@clerk/clerk-react";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -26,21 +25,24 @@ import {
   useSidebar
 } from "@/components/ui/sidebar";
 import { useToast } from "@/hooks/use-toast";
+import { useLocalAuth } from "@/contexts/AuthContext";
 
 export const AppSidebarContent = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { state } = useSidebar();
-  const { signOut } = useClerk();
+  const { logout } = useLocalAuth();
   const { toast } = useToast();
   const isCollapsed = state === "collapsed";
 
   const handleSignOut = async () => {
     try {
-      await signOut();
+      logout();
       toast({
         title: "Signed out",
         description: "You have been signed out successfully.",
       });
+      navigate("/");
     } catch (error) {
       console.error("Error signing out:", error);
       toast({

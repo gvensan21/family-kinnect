@@ -1,11 +1,12 @@
 
-import { useAuth } from "@clerk/clerk-react";
+import { useLocalAuth } from "../contexts/AuthContext";
 import { FamilyTreeAPI } from "../services/familyTreeApi";
 import { FamilyMember } from "../types/user";
 
 // Custom hook to use the Family Tree API
 export const useFamilyTree = () => {
-  const { userId } = useAuth();
+  const { currentUser } = useLocalAuth();
+  const userId = currentUser?.id;
   
   return {
     saveProfileAndCreateNode: async (profileData: Record<string, any>): Promise<FamilyMember> => {
