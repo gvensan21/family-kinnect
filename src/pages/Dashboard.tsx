@@ -3,7 +3,8 @@ import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import NewFamilyTreeFlow from "@/components/FamilyTree";
 import { useQuery } from "@tanstack/react-query";
-import { useFamilyTree, FamilyMember } from "@/services/api";
+import { useFamilyTree } from "@/hooks/useFamilyTree";
+import { FamilyMember } from "@/types/user";
 import { useAuth } from "@clerk/clerk-react";
 
 const Dashboard = () => {
